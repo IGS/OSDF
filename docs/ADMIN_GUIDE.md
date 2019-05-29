@@ -122,19 +122,17 @@ cores) Node.js will be using for OSDF and other details. If OSDF starts
 correctly without errros, one will see a message that looks like
 this:
 
-```
-===============================================
-Welcome to
-  ____  _______  ____
- / __ \/ __/ _ \/ __/
-/ /_/ /\ \/ // / _/
-\____/___/____/_/
+    ===============================================
+    Welcome to
+      ____  _______  ____
+     / __ \/ __/ _ \/ __/
+    / /_/ /\ \/ // / _/
+    \____/___/____/_/
 
 
-Open Science Data Framework
+    Open Science Data Framework
 
-===============================================
-```
+    ===============================================
 
 [top](#top)
 
@@ -146,11 +144,11 @@ is simply the "working" directory in the root of the OSDF installation. Under
 that directory, there is a file called users.db that lists the valid users for
 the OSDF instance. The format of the file is simple:
 
-  username:hashed_password
+    username:hashed_password
 
 For example:
 
-  test:sha1$d7e6a336$1$d96d61f49ed32e79cf9ed90402d691d85d197fff
+    test:sha1$d7e6a336$1$d96d61f49ed32e79cf9ed90402d691d85d197fff
 
 The password is salted and hashed to prevent the password from being exposed
 "in the clear". A discussion about the merits of such a scheme is beyond the
@@ -160,7 +158,7 @@ add a new line to the users.db file along with the corresponding hashed
 password. To aid in this process, OSDF comes bundled with a utility script
 found in the "bin" directory: generate_password_hash.js. Invoking
 generate_password_hash.js requires the username that the hash should be
-generated for. The password itself is entered interactively in a mannter that
+generated for. The password itself is entered interactively in a manner that
 does not echo it to the terminal window (for security). A brief example
 follows:
 
@@ -181,7 +179,7 @@ information endpoint:
 
     $ curl -X GET -u cooluser:test http://X.X.X.X:8123/info
 
-where "X.X.X.X" is the OSDF servers IP address or hostname.
+where "X.X.X.X" is the OSDF server's IP address or hostname.
 
 Now that the user has been added to the system, an OSDF administrator
 may also wish to add the user to one or more groups in a namespace, or
@@ -207,10 +205,10 @@ The organizational structure should look like this:
 
 Each namespace has its own directory, and each one should have an "acls"
 (ACL=Access Control List) directory. In the "acls" directory, administrators
-can place a file. The name of the file will be interpreted as the name of a
+can place a file where the name of the file will be interpreted as the name of a
 group in OSDF, and the file may contain usernames/accounts that are to be
 members of the group. For instance, bundled with the reference OSDF
-implementation is a namespace called "test". The "test" namespace "acls"
+implementation is a namespace called "test". The "test" namespace's "acls"
 directory has 3 files in it: managers, executives, and associates. Therefore,
 there are 3 acls for the "test" namespace. Each of these files contains the
 membership of those acls, one account/username per line.
@@ -334,11 +332,11 @@ network the OSDF instance is to be found. This is accomplished with a
 dedicated configuration file: test_config.ini. This is an INI style
 configuration file that must adhere to the following format:
 
-  [osdf]
-  host=X.X.X.X
-  port=8123
-  username=USERNAME
-  password=PASSWORD
+    [osdf]
+    host=X.X.X.X
+    port=8123
+    username=USERNAME
+    password=PASSWORD
 
 Replace X.X.X.X with the IP address or hostname of the OSDF server you wish
 to test. Replace 8123, with the specific port number of your OSDF server

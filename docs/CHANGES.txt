@@ -1,11 +1,11 @@
-osdf (0.38.0)
+0.38.0
   * Switched to json-schema validation to use the ajv library in place of tv4.
   * Fixes to bundled schema examples.
   * Added admin guide under docs.
 
   -- Victor <victor73@github.com> Mon, 06 May 2019 10:00:00 -0400
 
-osdf (0.37.1)
+0.37.1
   * Updated testing documentation mocha from nodeunit.
   * Changed gulp "test" target to invoke mocha from nodeunit.
 

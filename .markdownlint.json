@@ -1,0 +1,6 @@
+{
+    "default": true,
+    "MD014": false,
+    "MD033": false,
+    "no-hard-tabs": true
+}
