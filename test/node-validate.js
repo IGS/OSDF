@@ -191,7 +191,10 @@ describe('node-validate', function() {
             acl: { 'read': ['all'], 'write': ['all'] },
             linkage: {},
             node_type: 'target',
-            meta: { color: 'red' }
+            meta: {
+              color: 'red',
+              description: 'description'
+            }
         };
 
         tutils.validate_node(test_node, auth, function(err, resp) {

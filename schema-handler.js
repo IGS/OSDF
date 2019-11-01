@@ -8,6 +8,9 @@ var path = require('path');
 var schema_utils = require('schema_utils');
 var util = require('util');
 var waterfall = require('async/waterfall');
+var format = require('string-format');
+
+format.extend(String.prototype);
 
 var root_local_dir = osdf_utils.get_osdf_root();
 var logger = osdf_utils.get_logger();
@@ -97,7 +100,7 @@ exports.get_all_schemas = function(request, response) {
 exports.get_all_aux_schemas = function(request, response) {
     var ns = request.params.ns;
 
-    logger.debug('In get_all_aux_schemas. Namespace: ' + ns + '.');
+    logger.debug('In get_all_aux_schemas. Namespace: {}.'.format(ns));
 
     if (global_schemas.hasOwnProperty(ns)) {
         // Need to return all the auxiliary schemas, which are found
@@ -121,14 +124,14 @@ exports.get_aux_schema = function(request, response) {
     var ns = request.params.ns;
     var aux = request.params.aux;
 
-    logger.debug('In get_aux_schema (ns:aux): (' + ns + ':' + aux + ').');
+    logger.debug('In get_aux_schema (ns:aux): ({}:{}).'.format(ns, aux));
 
     if (global_schemas.hasOwnProperty(ns)) {
         if (global_schemas[ns].hasOwnProperty('aux') &&
                 global_schemas[ns]['aux'].hasOwnProperty(aux)) {
             response.jsonp(global_schemas[ns]['aux'][aux]);
         } else {
-            logger.warn('Unknown ns:aux: ' + ns + ':' + aux);
+            logger.warn('Unknown ns:aux: {}:{}.'.format(ns, aux));
             osdf_error(response, 'Auxiliary schema not found.', 404);
         }
     } else {
@@ -150,7 +153,7 @@ exports.get_schema = function(request, response) {
                 global_schemas[ns]['schemas'].hasOwnProperty(schema)) {
             response.jsonp(global_schemas[ns]['schemas'][schema]);
         } else {
-            logger.warn('Unknown ns:schema: ' + ns + ':' + schema);
+            logger.warn('Unknown ns:schema: {}:{}.'.format(ns, schema));
             osdf_error(response, 'Schema not found.', 404);
         }
     } else {
@@ -266,8 +269,10 @@ exports.insert_aux_schema = function(request, response) {
 
         // The URL to the new aux schema should be supplied back in the form
         // of a Location header
-        var location = base_url + ':' + port + '/namespaces/' + ns +
-                       '/schemas/aux/' + aux_schema_name;
+        var location = '{}:{}/namespaces/{}/schemas/aux/{}'.format(
+            base_url, port, ns, aux_schema_name
+        );
+
         response.location(location);
         response.status(201).send('');
     } catch (e) {
@@ -349,8 +354,11 @@ exports.insert_schema = function(request, response) {
     // reject the insertion as the user should either do an update or a delete
     // instead.
     if (global_schemas[ns]['schemas'].hasOwnProperty(schema_name)) {
-        osdf_error(response, 'Schema ' + schema_name +
-                   ' already exists in namespace ' + ns, 409);
+        osdf_error(
+            response,
+            'Schema {} already exists in namespace {}.'.format(schema_name, ns),
+            409
+        );
         return;
     }
 
@@ -388,15 +396,18 @@ exports.insert_schema = function(request, response) {
 
         // Send a message to the master process so that it can notify other
         // sibling workers about this.
-        process.send({ cmd: 'schema_change',
+        process.send({
+            cmd: 'schema_change',
             type: 'insertion',
             ns: ns,
             name: schema_name,
             json: schema_json
         });
 
-        var location = base_url + ':' + port + '/namespaces/' + ns +
-                      '/schemas/' + schema_name;
+        var location = '{}:{}/namespaces/{}/schemas/{}'.format(
+            base_url, port, ns, schema_name
+        );
+
         response.location(location);
         response.status(201).send('');
     } catch (e) {
@@ -831,8 +842,10 @@ function delete_aux_schema_helper(namespace, aux_schema_name) {
             delete global_schemas[namespace]['aux'][aux_schema_name];
         }
     } else {
-        logger.warn('Namespace ' + namespace + ' did not have auxiliary schema: ' +
-                    aux_schema_name + '. Nothing to do.');
+        logger.warn(
+            'Namespace "{}" did not have auxiliary schema: "{}". Nothing to do.'
+                .format(namespace, aux_schema_name)
+        );
     }
 }
 
@@ -871,8 +884,8 @@ function delete_schema_helper(namespace, schema_name) {
             delete global_schemas[namespace]['schemas'][schema_name];
         }
     } else {
-        logger.warn('Namespace ' + namespace + ' did not have schema: ' +
-                    schema_name + '. Nothing to do.');
+        logger.warn('Namespace "{}" did not have schema "{}". Nothing to do.'
+            .format(namespace, schema_name));
     }
 }
 
@@ -885,10 +898,12 @@ function aux_schema_change_helper(namespace, aux_schema_name, aux_schema_json, w
         throw "No 'aux' structure for namespace: " + namespace;
     }
 
-    if ( global_schemas[namespace]['aux'].hasOwnProperty(aux_schema_name) ) {
+    if (global_schemas[namespace]['aux'].hasOwnProperty(aux_schema_name)) {
         // Overwriting an auxiliary schema, so let's just make a note of that.
-        logger.warn('Overwriting existing auxiliary schema (ns:aux_schema): (' +
-                    namespace + ':' + aux_schema_name + ')');
+        logger.warn(
+            'Overwriting existing auxiliary schema (ns:aux_schema): ({}:{})'
+                .format(namespace, aux_schema_name)
+        );
     }
 
     if (write) {
@@ -920,12 +935,16 @@ function get_ns_schemas(ns, callback) {
         function(callback) {
             // Determine the directory to the schemas for this namespace.
             ns_schema_dir = path.join(working_dir, 'namespaces', ns, 'schemas');
-            logger.debug('Schema dir for namespace ' + ns + ': ' + ns_schema_dir);
+            logger.debug('Schema dir for namespace {}: {}.'
+                .format(ns, ns_schema_dir));
 
             // Scan the directory for the schema files.
             fs.readdir(ns_schema_dir, function(err, files) {
                 if (err) {
-                    logger.error('Unable to scan schema directory for namespace ' + ns, err);
+                    logger.error(
+                        'Unable to scan schema directory for namespace ' + ns,
+                        err
+                    );
 
                     callback(err);
                 } else {
@@ -939,7 +958,7 @@ function get_ns_schemas(ns, callback) {
             });
         },
         function(files, callback) {
-            logger.debug('Scanned ' + files.length + ' schemas.');
+            logger.debug('Scanned {} schemas.'.format(files.length));
 
             var schemas = {};
 
@@ -974,8 +993,9 @@ function get_ns_schemas(ns, callback) {
         function(schemas, callback) {
             // Determine the directory to the auxiliary schemas for this namespace.
             ns_aux_schema_dir = path.join(working_dir, 'namespaces', ns, 'aux');
-            logger.debug('Aux schema dir for namespace "' + ns + '": ' +
-                         ns_aux_schema_dir);
+            logger.debug('Aux schema dir for namespace "{}": {}'
+                .format(ns, ns_aux_schema_dir)
+            );
 
             // Scan the directory for the schema files.
             fs.readdir(ns_aux_schema_dir, function(err, files) {
@@ -994,7 +1014,7 @@ function get_ns_schemas(ns, callback) {
             });
         },
         function(files, schemas, callback) {
-            logger.debug('Scanned ' + files.length + ' auxiliary schemas.');
+            logger.debug('Scanned {} auxiliary schemas.'.format(files.length));
 
             var aux_schemas = {};
 
@@ -1036,8 +1056,7 @@ function get_ns_schemas(ns, callback) {
     // ns_final_struct is set, or err will contain the problem
     // if one occurred.
     function(err, ns_final_struct) {
-        // This is the callback provided by the invoker of this
-        // function.
+        // This is the callback provided by the invoker of this function.
         callback(err, ns_final_struct);
     });
 }
@@ -1056,8 +1075,9 @@ function schema_change_helper(namespace, schema_name, schema_json, write) {
 
     if ( global_schemas[namespace]['schemas'].hasOwnProperty(schema_name) ) {
         // Overwriting a schema, so let's just make a note of that.
-        logger.warn('Overwriting existing schema (ns:schema): (' +
-                    namespace + ':' + schema_name + ')');
+        logger.warn('Overwriting existing schema (ns:schema): ({}:{}).'
+            .format(namespace, schema_name)
+        );
     }
 
     if (write) {

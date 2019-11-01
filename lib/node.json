@@ -35,6 +35,13 @@
         "write"
       ]
     },
+    "hash": {
+      "description": "The cumulative ledger checksum for the node.",
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64,
+      "pattern": "^[a-f0-9]+$"
+    },
     "id": {
       "description": "The node ID. Omitted when a node is first inserted, so technically optional.",
       "type": "string"

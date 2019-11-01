@@ -18,6 +18,7 @@ var linkage_controller = require('linkage-controller');
 var osdf_utils = require('osdf_utils');
 var path = require('path');
 var perms = require('perms-handler');
+var provenance = require('provenance');
 var schema_utils = require('schema_utils');
 var series = require('async/series');
 var sprintf = require('sprintf').sprintf;
@@ -48,6 +49,7 @@ var validators = {};
 var base_validator;
 var base_validate;
 var working_dir;
+var couch_conn;
 var db;
 
 // This initializes the handler. The things we need to do before the
@@ -64,7 +66,7 @@ exports.init = function(emitter, working_dir_custom) {
 
     // Establish the connection parameters, including the application's
     // CouchDB credentials.
-    var couch_conn = new(cradle.Connection)('http://' + couch_address, couch_port, {
+    couch_conn = new(cradle.Connection)('http://' + couch_address, couch_port, {
         auth: { username: couch_user, password: couch_pass },
         cache: false,
         raw: false
@@ -475,8 +477,29 @@ exports.insert_node = function(request, response) {
             }
         },
         function(node_data, callback) {
+            couch_conn.uuids(1, function(err, uuid_list) {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    callback(null, uuid_list[0], node_data);
+                }
+            });
+        },
+        function(uuid, node_data, callback) {
+            node_data['ver'] = 1;
+            node_data['id'] = uuid;
+
+            // Checksum the data for provenance purposes
+            node_data = provenance.hash_first_version(node_data);
+
+            // Set the ID for the document for CouchDB
+            //node_data['_id'] = uuid;
+
+            // Persist to CouchDB
             logger.debug('Saving node to CouchDB.');
-            db.save(node_data, function(err, couch_response) {
+
+            //db.save(node_data, function(err, couch_response) {
+            db.save(uuid, node_data, function(err, couch_response) {
                 if (err) {
                     logger.error(err);
                     callback(err);
@@ -485,13 +508,14 @@ exports.insert_node = function(request, response) {
                     callback(null, couch_response, node_data);
                 }
             });
-        }, function(couch_response, node_data, callback) {
+        },
+        function(couch_response, node_data, callback) {
             var node_id = couch_response.id;
 
             if (couch_response.ok === true) {
                 // Save the history
                 node_data['id'] = node_id;
-                node_data['ver'] = 1;
+
                 save_history(node_id, node_data, function(err) {
                     if (err) {
                         logger.error(err);
@@ -608,10 +632,9 @@ exports.update_node = function(request, response) {
     });
 };
 
-// Just validate a node against a schema if it has one
-// assigned for the specified node_type. If it does NOT
-// then then only a check for well-formedness and basic
-// OSDF structure is performed.
+// Just validate a node against a schema if it has one assigned for the
+// specified node_type. If it does NOT then then only a check for
+// well-formedness and basic OSDF structure is performed.
 exports.validate_node = function(request, response) {
     logger.debug('In validate_node.');
 
@@ -929,8 +952,9 @@ function get_couch_doc(couchdb_id, callback) {
 function update_helper(user, node_id, node_data, callback) {
     logger.debug('In update_helper.');
 
-    var node_version = node_data.ver;
-    var result = {};  // What we will send back through the callback
+    var node_version = node_data['ver'];
+    // What we will send back through the callback
+    var result = {};
 
     waterfall([
         function(callback) {
@@ -948,13 +972,12 @@ function update_helper(user, node_id, node_data, callback) {
         },
         function(data, callback) {
             var previous_node = data;
-            var couchdb_version = previous_node['_rev'];
-            var version = parse_version(couchdb_version);
+            var previous_version = previous_node['ver'];
+            var previous_couch_version = previous_node['_rev'];
 
-            if (node_version !== version) {
-                var msg = "Version provided ({}) doesn't match " +
-                          'saved ({}).';
-                msg = msg.format(node_version, version);
+            if (node_version !== previous_version) {
+                var msg = "Version provided ({}) doesn't match saved ({}).";
+                msg = msg.format(node_version, previous_version);
 
                 result['msg'] = msg;
                 result['code'] = 422;
@@ -962,10 +985,10 @@ function update_helper(user, node_id, node_data, callback) {
                 // This should stop the waterfall...
                 callback(msg);
             } else {
-                callback(null, previous_node, couchdb_version);
+                callback(null, previous_node, previous_couch_version);
             }
         },
-        function(previous_node, couchdb_version, callback) {
+        function(previous_node, previous_couch_version, callback) {
             // Check that the user has sufficient permissions to make
             // edits to this node.
             var can_write = perms.has_write_permission(user, previous_node);
@@ -974,7 +997,7 @@ function update_helper(user, node_id, node_data, callback) {
                 logger.debug('User {} has write permission to node {}.'
                     .format(user, node_id)
                 );
-                callback(null, previous_node, couchdb_version);
+                callback(null, previous_node, previous_couch_version);
             } else {
                 var msg = 'User {} does not have write permissions for node {}.'
                     .format(user, node_id);
@@ -982,11 +1005,15 @@ function update_helper(user, node_id, node_data, callback) {
                 callback(msg);
             }
         },
-        function(previous_node, couchdb_version, callback) {
-            node_data['ver'] = node_data['ver']++;
+        function(previous_node, previous_couch_version, callback) {
+            node_data['ver'] = node_version + 1;
+
+            // Checksum with the previous version of the node to extend
+            // provenance/checksum chain
+            node_data = provenance.set_checksums(previous_node, node_data);
 
             // Okay to proceed with the update because the versions match
-            db.save(node_id, couchdb_version, node_data, function(err, couch_response) {
+            db.save(node_id, previous_couch_version, node_data, function(err, couch_response) {
                 if (err) {
                     result['msg'] = err.error;
                     result['code'] = 500;

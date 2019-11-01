@@ -98,35 +98,35 @@ gulp.task('clean', function() {
 
 // Compile the jison based parser.
 gulp.task('oql_parser', function() {
-    gulp.src('./util/oql.jison')
+    return gulp.src('./util/oql.jison')
         .pipe(shell(['./node_modules/.bin/jison <%= file.path %> -o oql_jison_parser.js']));
 });
 
-gulp.task('deps', ['oql_parser'], function() {
-    gulp.src('')
+gulp.task('deps', gulp.series(['oql_parser'], function() {
+    return gulp.src('.')
         .pipe(shell(['npm install']));
-});
+}));
 
-gulp.task('build', ['version', 'deps'], function() {
+gulp.task('build', gulp.series(['version', 'deps'], function() {
     return gulp.src(sources, {'base': '.'})
         .pipe(gulp.dest('build/' + title));
-});
+}));
 
-gulp.task('tar', ['build'], function() {
+gulp.task('tar', gulp.series(['build'], function() {
     return gulp.src('build/' + title + '/**', {'base': 'build'})
         .pipe(tar(title + '.tar'))
         .pipe(gulp.dest('build'));
-});
+}));
 
-gulp.task('gzip', ['tar'], function() {
+gulp.task('gzip', gulp.series(['tar'], function() {
     var tarfile = 'build/{}.tar'.format(title);
 
     return gulp.src(tarfile, {'base': 'build'})
         .pipe(gzip())
         .pipe(gulp.dest('build'));
-});
+}));
 
-gulp.task('bump_package_files', ['version'], function(cb) {
+gulp.task('bump_package_files', gulp.series(['version'], function(cb) {
     var filename = './package.json';
 
     fs.readFile(filename, 'utf-8', function(err, data) {
@@ -146,7 +146,7 @@ gulp.task('bump_package_files', ['version'], function(cb) {
             }
         });
     });
-});
+}));
 
 gulp.task('latest_changes', function(cb) {
     get_changelog(function(err, lines) {
@@ -155,14 +155,14 @@ gulp.task('latest_changes', function(cb) {
     });
 });
 
-gulp.task('deb_orig_tarball', ['gzip'], function() {
+gulp.task('deb_orig_tarball', gulp.series(['gzip'], function() {
     return gulp.src('build/{}.tar.gz'.format(title))
         .pipe(rename('osdf_{}.orig.tar.gz'.format(version)))
         .pipe(gulp.dest('build'));
-});
+}));
 
 // Create the deb package file.
-gulp.task('deb', ['deb_orig_tarball'], function(callback) {
+gulp.task('deb', gulp.series(['deb_orig_tarball'], function(callback) {
     var debuild = 'debuild -us -uc --lintian-opts ' +
                   '--suppress-tags bad-distribution-in-changes-file';
 
@@ -176,7 +176,7 @@ gulp.task('deb', ['deb_orig_tarball'], function(callback) {
         }
         callback(err);
     });
-});
+}));
 
 // Run the unit tests in the test directory.
 gulp.task('test', function() {
@@ -196,7 +196,7 @@ gulp.task('test', function() {
         ));
 });
 
-gulp.task('dist', ['deb'], function() {
+gulp.task('dist', gulp.series(['deb'], function() {
     var base = 'build/osdf_' + version;
     var tarball = 'build/osdf-{}.tar.gz'.format(version);
     var files = [
@@ -210,6 +210,8 @@ gulp.task('dist', ['deb'], function() {
 
     return gulp.src(files)
         .pipe(gulp.dest('dist'));
-});
+}));
 
-gulp.task('default', ['dist']);
+gulp.task('default', gulp.series(['dist'], function(cb) {
+    cb(null);
+}));

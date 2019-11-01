@@ -163,7 +163,7 @@ exports.get_user_acls = function(namespace, user) {
 };
 
 function eval_permission(user, node, operation) {
-    logger.debug('In eval_permission: can {} {} on {}?'
+    logger.debug('In eval_permission: can user "{}" {} on {}?'
         .format(user, operation, node['id'])
     );
 

@@ -1,3 +1,14 @@
+osdf (0.39.0-1) unstable; urgency=low
+
+    * Hashing version to version to guarantee provenance of changes/history of
+      nodes.
+    * Improved error detection and handling on startup.
+    * Upgraded libraries to more recent versions to eliminates some
+      vulnerabilities reported by npm audit.
+    * Migrated gulpfile to gulp 4.
+
+ -- Victor <victor73@github.com>  Tue, 29 Oct 2019 12:00:00 -0400
+
 osdf (0.38.0-1) unstable; urgency=low
 
   * Switched to json-schema validation to use the ajv library in place of tv4.

@@ -71,11 +71,9 @@
     recoverable: (boolean: TRUE when the parser has a error recovery rule available for this particular error)
   }
 */
-var t = (function(){
+var oql_jison_parser = (function(){
 var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,4],$V1=[1,9],$V2=[1,13],$V3=[1,16],$V4=[1,17],$V5=[1,15],$V6=[1,14],$V7=[1,19],$V8=[1,20],$V9=[5,7,8,10],$Va=[1,29],$Vb=[1,30],$Vc=[1,31],$Vd=[1,32],$Ve=[1,47],$Vf=[1,48],$Vg=[1,44],$Vh=[1,45],$Vi=[1,46],$Vj=[5,7,8,10,21,23,35,36,37,38],$Vk=[24,25],$Vl=[2,39],$Vm=[2,40],$Vn=[24,25,26];
-var parser = {trace: function trace () {
-        Jison.print.apply(null, arguments);
-    },
+var parser = {trace: function trace () { },
 yy: {},
 symbols_: {"error":2,"expressions":3,"e":4,"EOF":5,"term":6,"AND":7,"OR":8,"(":9,")":10,"search":11,"allsearch":12,"comparison":13,"bool_check":14,"NOT":15,"query_text":16,"field":17,"all":18,"comparator":19,"number":20,"EQ":21,"BOOL":22,"NE":23,"FLOAT":24,"INTEGER":25,"[":26,"ALL":27,"]":28,"DOTTED":29,"IDENT":30,"STRING":31,"QUOTE":32,"ALPHA":33,"bool_compar":34,"CMP_GT":35,"CMP_LT":36,"CMP_GTE":37,"CMP_LTE":38,"$accept":0,"$end":1},
 terminals_: {2:"error",5:"EOF",7:"AND",8:"OR",9:"(",10:")",15:"NOT",21:"EQ",22:"BOOL",23:"NE",24:"FLOAT",25:"INTEGER",26:"[",27:"ALL",28:"]",29:"DOTTED",30:"IDENT",31:"STRING",32:"QUOTE",33:"ALPHA",35:"CMP_GT",36:"CMP_LT",37:"CMP_GTE",38:"CMP_LTE"},
@@ -688,9 +686,9 @@ return new Parser;
 
 
 if (typeof require !== 'undefined' && typeof exports !== 'undefined') {
-exports.parser = t;
-exports.Parser = t.Parser;
-exports.parse = function () { return t.parse.apply(t, arguments); };
+exports.parser = oql_jison_parser;
+exports.Parser = oql_jison_parser.Parser;
+exports.parse = function () { return oql_jison_parser.parse.apply(oql_jison_parser, arguments); };
 exports.main = function commonjsMain (args) {
     if (!args[1]) {
         console.log('Usage: '+args[0]+' FILE');

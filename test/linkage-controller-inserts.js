@@ -191,6 +191,7 @@ describe('linkage-controller-inserts', function() {
                 var target2 = _.cloneDeep(test_node);
                 target2['node_type'] = 'target';
                 target2['meta']['color'] = 'red';
+                target2['meta']['description'] = 'description';
 
                 tutils.insert_node(target2, auth, function(err, resp) {
                     if (err) {
@@ -516,6 +517,7 @@ describe('linkage-controller-inserts', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -593,6 +595,7 @@ describe('linkage-controller-inserts', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -674,6 +677,7 @@ describe('linkage-controller-inserts', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -750,6 +754,7 @@ describe('linkage-controller-inserts', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {

@@ -33,8 +33,12 @@ function engine_start() {
     if (cluster.isMaster) {
         start_master(config);
     } else {
-        var forked_worker = require('./worker');
-        forked_worker.start_worker(config, working_path);
+        try {
+            var forked_worker = require('./worker');
+            forked_worker.start_worker(config, working_path);
+        } catch (e) {
+            process.send({'cmd': 'abort', 'reason': e.message});
+        }
     }
 }
 

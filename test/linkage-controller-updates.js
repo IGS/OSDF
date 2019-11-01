@@ -43,6 +43,7 @@ describe('linkage-controller-updates', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -130,6 +131,7 @@ describe('linkage-controller-updates', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -149,6 +151,7 @@ describe('linkage-controller-updates', function() {
                 example_node['node_type'] = 'example';
                 example_node['linkage'] = {related_to: [target_node_id]};
                 example_node['meta']['color'] = 'red';
+                example_node['meta']['description'] = 'description';
                 example_node['ver'] = 1;
 
                 tutils.insert_node(example_node, auth, function(err, resp) {
@@ -240,6 +243,7 @@ describe('linkage-controller-updates', function() {
                 var target = _.cloneDeep(test_node);
                 target['node_type'] = 'target';
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -351,6 +355,7 @@ describe('linkage-controller-updates', function() {
                 var target = _.cloneDeep(test_node);
                 target['node_type'] = 'target';
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -686,6 +691,7 @@ describe('linkage-controller-updates', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {
@@ -780,6 +786,7 @@ describe('linkage-controller-updates', function() {
                 target['node_type'] = 'target';
                 target['linkage'] = {};
                 target['meta']['color'] = 'red';
+                target['meta']['description'] = 'description';
 
                 tutils.insert_node(target, auth, function(err, resp) {
                     if (err) {

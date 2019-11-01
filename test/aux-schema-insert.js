@@ -11,7 +11,7 @@ var auth = tutils.get_test_auth();
 var bad_auth = tutils.get_invalid_auth();
 
 var test_aux_schema = {
-    description: 'A test schema.',
+    description: 'A test aux schema.',
     type: 'object',
     properties: {
         prop: {
