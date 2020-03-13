@@ -130,7 +130,7 @@ describe('node-insert', function() {
                 if (inserted) {
                     tutils.delete_node(node_id, auth, function(err) {
                         if (err) {
-                            console.err('Problem deleting inserted node: ', err);
+                            console.error('Problem deleting inserted node: ', err);
                         }
                     });
                 }
@@ -327,7 +327,7 @@ describe('node-insert', function() {
                     // invalid, but if we DID insert anyway (perhaps due to a bug),
                     // then we clean up after ourselves by deleting.
                     tutils.delete_node(node_id, auth, function(err) {
-                        console.err('Problem deleting inserted node: ', err);
+                        console.error('Problem deleting inserted node: ', err);
                     });
                 }
 

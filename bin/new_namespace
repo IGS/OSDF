@@ -1,27 +1,58 @@
 #!/bin/bash
 
-# Determine the path to this script
-ABSPATH="$(cd "${0%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
-DIR=`dirname $ABSPATH`
+function usage {
+    echo "$0 <directory> <namespace_name>" >&2
+    echo >&2
+    echo "This script creates an OSDF namespace in a directory. The directory" >&2
+    echo "should be the working namespace directory of the OSDF server." >&2
+    echo >&2
+    echo "e.g. /usr/src/app/working/namespaces" >&2
+    echo >&2
+    echo "The namespace_name parameter must not already exist in the namespace directory." >&2
+}
 
-NS_NAME=$1
+DIR=$1
+NS_NAME=$2
 
-if [ -z $NS_NAME ]; then
-    echo "$0 <namespace_name>" >&2
-    exit 1;
+if [ -z $DIR ]; then
+    echo "A directory parameter must be specified." >&2
+    usage
+    exit 1
 fi
 
-if [ -d "$DIR/namespaces/$NS_NAME" ]; then
-    echo "It appears that this namespace already exists." >&2
+if [ -z $NS_NAME ]; then
+    echo "A namespace name parameter must be specified." >&2
+    usage
+    exit 1
+fi
+
+if [ ! "${DIR##*/}" = "namespaces" ]; then
+    echo "The directory parameter must end in \`namespaces\`." >&2
+    echo
+    usage
+    exit 1
+fi
+
+if [ ! -e $DIR ]; then
+    echo "Namespace directory <<$DIR>> must exist." >&2
+    echo
+    usage
     exit 2;
 fi
 
-mkdir "$DIR/namespaces/$NS_NAME" && \
-mkdir "$DIR/namespaces/$NS_NAME/aux" && \
-mkdir "$DIR/namespaces/$NS_NAME/schemas" && \
-mkdir "$DIR/namespaces/$NS_NAME/vocabs"
+if [ -e "$DIR/$NS_NAME" ]; then
+    echo "File with name <<$NS_NAME>> already exists within the namespace directory." >&2
+    echo
+    usage
+    exit 2;
+fi
 
-INFO_JSON="$DIR/namespaces/$NS_NAME/info.json"
+mkdir "$DIR/$NS_NAME" && \
+mkdir "$DIR/$NS_NAME/aux" && \
+mkdir "$DIR/$NS_NAME/schemas" && \
+mkdir "$DIR/$NS_NAME/acls"
+
+INFO_JSON="$DIR/$NS_NAME/info.json"
 cat > $INFO_JSON <<Endofmessage
 {
   "$NS_NAME": {

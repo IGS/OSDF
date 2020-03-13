@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 // Scan the current directory for Javascript files that contain
 // CouchDB design documents. Such files will have the following
